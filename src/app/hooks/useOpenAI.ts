@@ -3,7 +3,6 @@ import OpenAI from 'openai';
 
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
-console.log(API_KEY)
 function useOpenAI() {
   const client = new OpenAI({ apiKey: API_KEY, dangerouslyAllowBrowser: true });
 
