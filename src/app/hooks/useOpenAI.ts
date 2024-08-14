@@ -1,29 +1,28 @@
-import { useState } from 'react';
-import OpenAI from 'openai';
-
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
-
-function useOpenAI() {
-  const client = new OpenAI({ apiKey: API_KEY, dangerouslyAllowBrowser: true });
-
+const useOpenAI = () => {
   const getCompletion = async (prompt: string) => {
     try {
-      let completion = await client.chat.completions.create({
-        messages: [
-          { "role": "system", "content": "Your job is to write about any topic asked by the user" },
-          { "role": "user", "content": prompt }
-        ],
-        model: "gpt-3.5-turbo",
+      const response = await fetch('/api/ai', {
+        method: 'POST',
+        body: JSON.stringify({ prompt }),
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
-  
-      return completion.choices[0].message;
-    } catch(e){
-      return {"role": "assistant", "content": "Something went wrong"}
+      
+      const result = await response.json()
+
+      if (!response.ok) {
+        return { role: 'assistant', content: result.content};
+      }
+
+      ;
+      return result;
+    } catch (error) {
+      return { role: 'assistant', content: 'Something went wrong' };
     }
-    
   };
 
   return getCompletion;
-}
+};
 
 export default useOpenAI;
