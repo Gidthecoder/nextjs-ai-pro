@@ -92,7 +92,7 @@ export default function Home() {
       <header className="flex flex-row fixed w-[100%] top-0 left-0 p-[10px] px-[20px] text-white text-center bg-[#242424]">
         <a className='text-[15px]'>WriterAI</a>
         <div className="ml-auto flex flex-row gap-[10px]">
-          { session 
+          { session && session.user
             ? <a>{session.user.name}</a>
             : <a onClick={() => { signIn('github') }} className="cursor-pointer">Sign in</a>
           }
