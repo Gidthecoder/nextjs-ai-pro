@@ -3,6 +3,7 @@
 //import the custom hook for getting the response from the OpenAI API
 import useOpenAI from './hooks/useOpenAI';
 
+import {signIn, signOut, useSession} from 'next-auth/react';
 
 import {useState, useRef, useEffect, FormEvent} from 'react';
 
@@ -12,10 +13,16 @@ type Message = {
 };
 
 export default function Home() {
+  const {data: session, status} = useSession();
+  console.log("status", status);
+  console.log("session", session);
+
+
   //initialize the custom hook
   const getCompletion = useOpenAI();
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
 
   //initial chats for the site
   let content: Message[]  = [
@@ -71,6 +78,7 @@ export default function Home() {
       setIsTyping(false)
     }
   }
+  
   useEffect(() => {
     if (chatContainerRef.current) {
       //whenever the chats state is updated, scroll to the bottom of the container element to display the recent messages
@@ -81,9 +89,18 @@ export default function Home() {
   return (
   <main ref={chatContainerRef} className='h-[100vh] overflow-y-scroll bg-[rgba(55,55,55,1)]'>
     
-      <header className="fixed w-[100%] top-0 left-0 p-[10px] px-[20px] text-white text-center bg-[#242424]">
+      <header className="flex flex-row fixed w-[100%] top-0 left-0 p-[10px] px-[20px] text-white text-center bg-[#242424]">
         <a className='text-[15px]'>WriterAI</a>
+        <div className="ml-auto flex flex-row gap-[10px]">
+          { session 
+            ? <a>{session.user.name}</a>
+            : <a onClick={() => { signIn('github') }} className="cursor-pointer">Sign in</a>
+          }
+          
+          { session && <a onClick={() => { signOut() }} className="cursor-pointer">Sign out</a>}
+        </div>
       </header>
+
 
       {/*this section displays the chats*/}
       <div className=' py-[100px]'>
@@ -111,11 +128,16 @@ export default function Home() {
 
       <div className='fixed w-[100%] p-[10px] bottom-0 bg-[#242424]'>
         {/*when the form is submitted, activate a submit event that sends the value of the input and the event to the handleChat function */}
-        <form action='' onSubmit={(e) => handleChat(input, e)}>
-          <input className=" lg:w-[50%] w-[70%] ml-[5%] lg:ml-[20%] p-[10px] outline-none bg-[#4d4d4dff] text-[15px] text-[#f2f2f2ff]" type='text' value={input} placeholder='Ask your questions' onChange={ (e) => setInput(e.target.value)}/>
-          <button className='py-[10px] px-[20px] bg-black text-[15px] text-[#f2f2f2ff]'>Ask</button>
-        </form>
+        
+        {session  
+          ? <form action='' onSubmit={(e) => handleChat(input, e)}>
+              <input className=" lg:w-[50%] w-[70%] ml-[5%] lg:ml-[20%] p-[10px] outline-none bg-[#4d4d4dff] text-[15px] text-[#f2f2f2ff]" type='text' value={input} placeholder='Ask your questions' onChange={ (e) => setInput(e.target.value)}/>
+              <button className='py-[10px] px-[20px] bg-black text-[15px] text-[#f2f2f2ff]'>Ask</button>
+            </form>
+          : <a className="block text-white text-[20px] text-center cursor-pointer" onClick={() => { signIn('github') }}>Sign in to send messages</a>
+        }
       </div>
+
   </main>
   );
 }
